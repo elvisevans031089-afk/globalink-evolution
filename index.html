@@ -1,0 +1,317 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GLOBALINK CORPORATE | SISTEMA ÉLITE MUNDIAL</title>
+    <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --neon: #39FF14; --gold: #D4AF37; --bg: #000; }
+        body { 
+            margin: 0; background: var(--bg); color: #fff; font-family: 'Orbitron', sans-serif;
+            background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
+            overflow-x: hidden;
+        }
+        
+        nav.top-nav {
+            position: fixed; top: 0; width: 100%; background: rgba(0,0,0,0.95);
+            border-bottom: 2px solid var(--neon); display: flex; justify-content: center;
+            gap: 15 px; padding: 15px 0; z-index: 2000; box-shadow: 0 0 15px var(--neon);
+        }
+
+        .btn-nav {
+            background: transparent; border: 1px solid var(--neon); color: var(--neon);
+            padding: 10px 15px; cursor: pointer; text-transform: uppercase; font-size: 11px;
+            font-family: 'Orbitron'; transition: 0.3s;
+        }
+        .btn-nav:hover { background: var(--neon); color: #000; box-shadow: 0 0 10px var(--neon); }
+
+        .section { display: none; padding: 120px 20px 60px; min-height: 100vh; box-sizing: border-box; }
+        .active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .earth-container { text-align: center; }
+        .earth { 
+            width: 250px; height: 250px; margin: auto;
+            background: url('https://upload.wikimedia.org/wikipedia/commons/2/22/Earth_Western_Hemisphere_transparent_background.png') no-repeat;
+            background-size: contain; border-radius: 50%; 
+            box-shadow: 0 0 50px rgba(57, 255, 20, 0.3);
+            animation: rotateEarth 40s linear infinite;
+        }
+        @keyframes rotateEarth { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .grid-shop { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; max-width: 1200px; margin: auto; }
+        .card { background: rgba(20,20,20,0.9); border: 1px solid #333; padding: 15px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.3s; }
+        .card:hover { border-color: var(--neon); transform: scale(1.05); }
+        .card img { width: 100%; height: 140px; object-fit: cover; border-radius: 8px; }
+
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.98); z-index: 4000; align-items: center; justify-content: center; overflow-y: auto;
+        }
+        .modal-content { background: #050505; padding: 25px; border: 2px solid var(--neon); border-radius: 20px; width: 90%; max-width: 500px; text-align: center; }
+
+        .valeria-trigger {
+            position: fixed; bottom: 30px; right: 30px; width: 65px; height: 65px;
+            background: #000; border: 2px solid var(--neon); border-radius: 50%;
+            cursor: pointer; z-index: 3000; box-shadow: 0 0 20px var(--neon);
+        }
+
+        footer { text-align: center; padding: 40px; color: var(--gold); border-top: 1px solid #222; font-size: 11px; letter-spacing: 2px; }
+        select, input { width: 100%; padding: 12px; margin: 8px 0; background: #111; border: 1px solid var(--neon); color: #fff; border-radius: 8px; font-family: 'Orbitron'; }
+        
+        .cart-count { background: var(--neon); color: #000; padding: 2px 8px; border-radius: 50%; font-size: 10px; margin-left: 5px; }
+    </style>
+</head>
+<body onload="initApp()">
+
+<nav class="top-nav">
+    <button class="btn-nav" onclick="show('home')">Inicio</button>
+    <button class="btn-nav" onclick="renderMainCatalog()">Tienda</button>
+    <button class="btn-nav" onclick="showCart()">Carrito <span id="c-count" class="cart-count">0</span></button>
+    <button class="btn-nav" onclick="accessVIP()" style="border-color:var(--gold); color:var(--gold);">Acceso VIP</button>
+</nav>
+
+<div class="valeria-trigger" onclick="toggleValeria()">
+    <img src="https://i.gifer.com/6os.gif" style="width:100%; border-radius:50%;">
+</div>
+
+<div id="home" class="section active">
+    <div class="earth-container">
+        <div class="earth"></div>
+        <h1 style="color:var(--neon); margin-top:20px;">GLOBALINK CORPORATE</h1>
+        <p style="color:var(--gold); font-size:12px;">PRESIDENTE ELVIS R. STONE</p>
+    </div>
+</div>
+
+<div id="shop" class="section">
+    <div id="shop-header" style="text-align:center; margin-bottom:30px;"></div>
+    <div class="grid-shop" id="catalog-display"></div>
+</div>
+
+<div id="vip" class="section">
+    <h2 style="text-align:center; color:var(--gold);">SISTEMA VIP REAL-TIME</h2>
+    <div style="background:#0a0a0a; padding:20px; border-radius:15px; border:1px solid var(--gold); max-width:800px; margin:auto;">
+        <canvas id="vipChart"></canvas>
+    </div>
+</div>
+
+<div id="item-modal" class="modal">
+    <div class="modal-content" id="item-detail"></div>
+</div>
+
+<div id="cart-modal" class="modal">
+    <div class="modal-content">
+        <h3 style="color:var(--neon)">CARRITO GLOBALINK</h3>
+        <div id="cart-items" style="text-align:left; font-size:12px; margin-bottom:15px; max-height:200px; overflow-y:auto;"></div>
+        <div style="border-top:1px solid #333; padding:10px;">
+            <p>Subtotal: <span id="sub-val">$0</span></p>
+            <p>Descuento 10%: <span id="desc-val" style="color:var(--neon)">$0</span></p>
+            <p>TOTAL A PAGAR: <span id="cart-total" style="color:var(--neon); font-size:1.4rem;">$0</span></p>
+        </div>
+        <div id="paypal-area"></div>
+        <button class="btn-nav" style="width:100%; margin-top:10px;" onclick="closeModals()">Seguir Comprando</button>
+    </div>
+</div>
+
+<div id="valeria-modal" class="modal">
+    <div class="modal-content">
+        <img src="https://i.gifer.com/6os.gif" style="width:70px; border-radius:50%; border:2px solid var(--neon);">
+        <p id="ia-status">¿Qué categoría desea explorar hoy, Presidente?</p>
+        <input type="text" id="ia-input" placeholder="Zapatos, Ropa, VIP..." onchange="askValeria(this.value)">
+        <button class="btn-nav" onclick="closeModals()">Cerrar</button>
+    </div>
+</div>
+
+<footer>
+    DERECHOS RESERVADOS PRESIDENTE ELVIS R STONE <br> GLOBALINK CORPORATE GROUP © 2026
+</footer>
+
+<script>
+    const WHATSAPP = "50660989585";
+    const PIN_VIP = "108926";
+    let cart = JSON.parse(localStorage.getItem('gl_cart')) || [];
+
+    const tiendaData = {
+        main: [
+            {n: "Zapatos", id: "cat_zap", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff"},
+            {n: "Ropa & Moda", id: "cat_rop", img: "https://images.unsplash.com/photo-1483985988355-763728e1935b"},
+            {n: "Tecnología", id: "cat_tec", img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30"},
+            {n: "Hogar & Cocina", id: "cat_hog", img: "https://images.unsplash.com/photo-1556910103-1c02745aae4d"},
+            {n: "VIP PACKS", id: "cat_vip", img: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b"}
+        ],
+        cat_zap: [
+            {n: "Zapatos de Hombre", p: 75, v: ["Cuero Ejecutivo", "Deportivo Running"], t: ["38","40","42","44"]},
+            {n: "Zapatos de Mujer", p: 65, v: ["Tacón Gala", "Casual Urban"], t: ["35","36","37","38"]},
+            {n: "Zapatos Niños/as", p: 40, v: ["Escolar", "Deportivo Luces"], t: ["25","28","30","32"]}
+        ],
+        cat_rop: [
+            {n: "Camisas", p: 35, v: ["Formal", "Sport"], t: ["S","M","L","XL"]},
+            {n: "Pantalones", p: 50, v: ["Jeans", "Gris Formal"], t: ["30","32","34","36"]},
+            {n: "Ropa Interior Hombre", p: 18, v: ["Bóxer Algodón", "Bóxer Seda"], t: ["M","L","XL"]},
+            {n: "Lencería Mujer", p: 28, v: ["Bracier Encaje", "Conjunto Sport"], t: ["34B","36B","38B"]},
+            {n: "Medias / Calcetines", p: 10, v: ["Ejecutivas", "Deportivas"], t: ["Única"]}
+        ],
+        cat_tec: [
+            {n: "Smartphones G-Pro", p: 500, v: ["Android 14", "iOS Edition"], t: ["128GB", "256GB"]},
+            {n: "Reloj Inteligente", p: 120, v: ["Titanium", "Sport Black"], t: ["44mm", "40mm"]}
+        ],
+        cat_hog: [
+            {n: "Utensilios Cocina", p: 90, v: ["Set Ollas Acero", "Set Cuchillos"], t: ["Premium"]},
+            {n: "Línea Blanca", p: 450, v: ["Microondas", "Licuadora Pro"], t: ["110V", "220V"]}
+        ],
+        cat_vip: [
+            {n: "Pack Edición $50", p: 50, v: ["Socio Limited"], t: ["Digital"]},
+            {n: "Pack Platinum $100", p: 100, v: ["Socio Executive"], t: ["Digital"]}
+        ]
+    };
+
+    function initApp() {
+        updateCartCount();
+        valeriaSpeak("Bienvenido Presidente Elvis Stone. Plataforma Globalink lista para operar.");
+    }
+
+    function show(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        closeModals();
+        window.scrollTo(0,0);
+    }
+
+    function renderMainCatalog() {
+        show('shop');
+        const header = document.getElementById('shop-header');
+        header.innerHTML = `<h2 style="color:var(--neon)">ALMACÉN GLOBALINK</h2><p>Seleccione una Categoría para ver variedad</p>`;
+        const display = document.getElementById('catalog-display');
+        display.innerHTML = "";
+        tiendaData.main.forEach(c => {
+            display.innerHTML += `
+                <div class="card" onclick="renderSubCatalog('${c.id}')">
+                    <img src="${c.img}">
+                    <h4>${c.n.toUpperCase()}</h4>
+                </div>`;
+        });
+    }
+
+    function renderSubCatalog(catId) {
+        const header = document.getElementById('shop-header');
+        header.innerHTML = `<button class="btn-nav" onclick="renderMainCatalog()">← Volver al Almacén</button><h2 style="color:var(--neon)">CATÁLOGO ESPECÍFICO</h2>`;
+        const display = document.getElementById('catalog-display');
+        display.innerHTML = "";
+        const sub = tiendaData[catId] || [];
+        sub.forEach((item, idx) => {
+            display.innerHTML += `
+                <div class="card" onclick="openProductDetail('${catId}', ${idx})">
+                    <div style="font-size:3rem; margin:10px;">📦</div>
+                    <h4>${item.n}</h4>
+                    <p style="color:var(--neon)">Desde $${item.p}</p>
+                    <button class="btn-nav">Ver Variedades</button>
+                </div>`;
+        });
+    }
+
+    function openProductDetail(catId, idx) {
+        const item = tiendaData[catId][idx];
+        const detail = document.getElementById('item-detail');
+        detail.innerHTML = `
+            <h3 style="color:var(--neon)">${item.n}</h3>
+            <p>Seleccione Estilo/Color:</p>
+            <select id="sel-v">${item.v.map(v => `<option value="${v}">${v}</option>`).join('')}</select>
+            <p>Seleccione Talla/Medida:</p>
+            <select id="sel-t">${item.t.map(t => `<option value="${t}">${t}</option>`).join('')}</select>
+            <button class="btn-nav" style="width:100%; margin-top:15px;" onclick="addCart('${item.n}', ${item.p})">AÑADIR AL CARRITO</button>
+            <button class="btn-nav" style="width:100%; margin-top:10px; border-color:red; color:red;" onclick="closeModals()">CANCELAR</button>
+        `;
+        document.getElementById('item-modal').style.display = 'flex';
+    }
+
+    function addCart(n, p) {
+        const v = document.getElementById('sel-v').value;
+        const t = document.getElementById('sel-t').value;
+        cart.push({n, v, t, p});
+        localStorage.setItem('gl_cart', JSON.stringify(cart));
+        updateCartCount();
+        valeriaSpeak("Artículo añadido al carrito.");
+        closeModals();
+        showCart();
+    }
+
+    function updateCartCount() {
+        document.getElementById('c-count').innerText = cart.length;
+    }
+
+    function showCart() {
+        const list = document.getElementById('cart-items');
+        list.innerHTML = cart.map((i, index) => `
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid #222; padding-bottom:5px;">
+                <span>${i.n} (${i.v} / ${i.t})</span>
+                <span>$${i.p} <button onclick="removeCart(${index})" style="background:none; border:none; color:red; cursor:pointer;">X</button></span>
+            </div>
+        `).join('');
+        
+        let sub = cart.reduce((s, i) => s + i.p, 0);
+        let desc = sub * 0.10;
+        let total = sub - desc;
+
+        document.getElementById('sub-val').innerText = "$" + sub.toFixed(2);
+        document.getElementById('desc-val').innerText = "-$" + desc.toFixed(2);
+        document.getElementById('cart-total').innerText = "$" + total.toFixed(2);
+        
+        document.getElementById('cart-modal').style.display = 'flex';
+        if(total > 0) renderPaypal(total);
+    }
+
+    function removeCart(index) {
+        cart.splice(index, 1);
+        localStorage.setItem('gl_cart', JSON.stringify(cart));
+        updateCartCount();
+        showCart();
+    }
+
+    function renderPaypal(monto) {
+        document.getElementById('paypal-area').innerHTML = "";
+        paypal.Buttons({
+            createOrder: (d, a) => a.order.create({ purchase_units: [{ amount: { value: monto.toFixed(2) } }] }),
+            onApprove: (d, a) => a.order.capture().then(det => {
+                const msg = `VENTA CONFIRMADA GLOBALINK: Total $${monto}. Comprador: ${det.payer.name.given_name}. Por favor verificar pago en elvisevans031089@gmail.com`;
+                window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`);
+                cart = [];
+                localStorage.setItem('gl_cart', JSON.stringify(cart));
+                updateCartCount();
+                show('home');
+            })
+        }).render('#paypal-area');
+    }
+
+    function askValeria(q) {
+        const text = q.toLowerCase();
+        if(text.includes("zapatos")) { renderSubCatalog('cat_zap'); valeriaSpeak("Cargando catálogo de calzado variado."); }
+        else if(text.includes("ropa") || text.includes("moda")) { renderSubCatalog('cat_rop'); valeriaSpeak("Abriendo sección de ropa, lencería y moda corporativa."); }
+        else if(text.includes("hogar") || text.includes("cocina")) { renderSubCatalog('cat_hog'); valeriaSpeak("Mostrando artículos de hogar y cocina."); }
+        else if(text.includes("vip")) { show('vip'); valeriaSpeak("Accediendo al área VIP."); }
+        else { valeriaSpeak("Abriendo el almacén principal."); renderMainCatalog(); }
+        closeModals();
+    }
+
+    function accessVIP() {
+        const p = prompt("INGRESE PIN VIP DE PRESIDENTE:");
+        if(p === PIN_VIP) { show('vip'); initChart(); } else { alert("ACCESO DENEGADO"); }
+    }
+
+    function initChart() {
+        const ctx = document.getElementById('vipChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: { labels: ['Socio 1','Socio 2','Socio 3','Hoy'], datasets: [{label:'Ventas Globales $', data:[2500, 6000, 4800, 9500], borderColor:'#39FF14', tension: 0.4}] }
+        });
+    }
+
+    function toggleValeria() { document.getElementById('valeria-modal').style.display = 'flex'; }
+    function closeModals() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
+    function valeriaSpeak(t) { const u = new SpeechSynthesisUtterance(t); u.lang = 'es-ES'; u.rate = 0.9; window.speechSynthesis.speak(u); }
+</script>
+</body>
+</html>
