@@ -1,0 +1,330 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GLOBALINK CORPORATE GROUP | SISTEMA ÉLITE 2026</title>
+    <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --neon: #39FF14; --gold: #D4AF37; --bg: #000; }
+        body { 
+            margin: 0; background: var(--bg); color: #fff; font-family: 'Orbitron', sans-serif;
+            background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
+            overflow-x: hidden;
+        }
+        
+        nav.top-nav {
+            position: fixed; top: 0; width: 100%; background: rgba(0,0,0,0.95);
+            border-bottom: 2px solid var(--neon); display: flex; justify-content: center;
+            gap: 15px; padding: 15px 0; z-index: 2000; box-shadow: 0 0 15px var(--neon);
+        }
+
+        .btn-nav {
+            background: transparent; border: 1px solid var(--neon); color: var(--neon);
+            padding: 10px 15px; cursor: pointer; text-transform: uppercase; font-size: 11px;
+            font-family: 'Orbitron'; transition: 0.3s;
+        }
+        .btn-nav:hover { background: var(--neon); color: #000; box-shadow: 0 0 10px var(--neon); }
+        .btn-vip-nav { border-color: var(--gold); color: var(--gold); }
+
+        .section { display: none; padding: 120px 20px 60px; min-height: 100vh; box-sizing: border-box; }
+        .active { display: block; animation: fadeIn 0.6s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .earth-container { text-align: center; margin-top: 20px; }
+        .earth { 
+            width: 280px; height: 280px; margin: auto;
+            background: url('https://upload.wikimedia.org/wikipedia/commons/2/22/Earth_Western_Hemisphere_transparent_background.png') no-repeat;
+            background-size: contain; border-radius: 50%; 
+            box-shadow: 0 0 60px rgba(57, 255, 20, 0.4);
+            animation: rotateEarth 40s linear infinite;
+        }
+        @keyframes rotateEarth { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .grid-shop { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; max-width: 1200px; margin: auto; }
+        .card { background: rgba(15,15,15,0.9); border: 1px solid #333; padding: 15px; border-radius: 12px; text-align: center; transition: 0.3s; }
+        .card:hover { border-color: var(--neon); transform: translateY(-5px); }
+        .card img { width: 100%; height: 160px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; }
+        
+        .cart-float {
+            position: fixed; bottom: 30px; left: 30px; background: var(--neon);
+            color: #000; padding: 18px; border-radius: 50px; font-weight: bold;
+            cursor: pointer; z-index: 3000; box-shadow: 0 0 20px var(--neon);
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 4000; align-items: center; justify-content: center;
+        }
+        .modal-content { 
+            background: #0a0a0a; padding: 30px; border: 2px solid var(--neon); 
+            border-radius: 20px; width: 90%; max-width: 450px; text-align: center;
+            box-shadow: 0 0 30px rgba(57, 255, 20, 0.2);
+        }
+
+        .valeria-ui {
+            position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px;
+            background: #000; border: 2px solid var(--neon); border-radius: 50%;
+            cursor: pointer; z-index: 3000; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 15px var(--neon);
+        }
+
+        footer { text-align: center; padding: 50px; color: var(--gold); border-top: 1px solid #222; margin-top: 60px; font-size: 12px; letter-spacing: 2px; }
+        select, input { width: 100%; padding: 12px; margin: 10px 0; background: #111; border: 1px solid #444; color: #fff; border-radius: 8px; font-family: 'Orbitron'; }
+    </style>
+</head>
+<body onload="initApp()">
+
+<nav class="top-nav">
+    <button class="btn-nav" onclick="show('home')">Inicio</button>
+    <button class="btn-nav" onclick="show('shop')">Tienda</button>
+    <button class="btn-nav btn-vip-nav" onclick="accessVIP()">Acceso VIP</button>
+</nav>
+
+<div id="cart-icon" class="cart-float" onclick="showCart()">
+    <span>🛒</span> <span id="cart-count">0</span> ARTÍCULOS
+</div>
+
+<div class="valeria-ui" onclick="toggleValeria()">
+    <img src="https://i.gifer.com/6os.gif" style="width:100%; border-radius:50%;">
+</div>
+
+<div id="home" class="section active">
+    <div class="earth-container">
+        <div class="earth"></div>
+        <h1 style="margin-top:30px;">GLOBALINK CORPORATE GROUP</h1>
+        <p style="color:var(--neon); letter-spacing: 8px; font-size: 14px;">PRESIDENTE ELVIS R. STONE</p>
+    </div>
+</div>
+
+<div id="shop" class="section">
+    <h2 style="text-align:center; color:var(--neon); margin-bottom:40px;">CATÁLOGO CORPORATIVO MUNDIAL</h2>
+    <div class="grid-shop" id="catalog"></div>
+</div>
+
+<div id="vip" class="section">
+    <h2 style="text-align:center; color:var(--gold);">SISTEMA DE GESTIÓN VIP</h2>
+    <div style="background:#0a0a0a; padding:30px; border-radius:20px; border:1px solid var(--gold); max-width:800px; margin:auto;">
+        <p style="text-align:center; color:var(--neon);">CRECIMIENTO DE RED EN TIEMPO REAL</p>
+        <canvas id="vipChart"></canvas>
+    </div>
+</div>
+
+<div id="product-modal" class="modal">
+    <div class="modal-content" id="modal-body"></div>
+</div>
+
+<div id="cart-modal" class="modal">
+    <div class="modal-content">
+        <h3 style="color:var(--neon)">MI CARRITO DE COMPRAS</h3>
+        <div id="cart-items" style="max-height:200px; overflow-y:auto; margin:20px 0; text-align:left; font-size:12px;"></div>
+        <div style="border-top:1px solid #333; padding-top:10px;">
+            <p>Subtotal: <span id="subtotal-val">$0</span></p>
+            <p style="color:var(--neon)">Descuento 10%: <span id="desc-val">$0</span></p>
+            <p style="font-size:1.5rem; font-weight:bold;">TOTAL: <span id="cart-total" style="color:var(--neon)">$0</span></p>
+        </div>
+        <div id="paypal-container" style="margin-top:20px;"></div>
+        <button class="btn-nav" style="width:100%; margin-top:15px; border-color:red; color:red;" onclick="closeModals()">Seguir Comprando</button>
+    </div>
+</div>
+
+<div id="valeria-modal" class="modal">
+    <div class="modal-content">
+        <img src="https://i.gifer.com/6os.gif" style="width:80px; border-radius:50%; border:2px solid var(--neon);">
+        <h3 style="color:var(--neon)">VALERIA ASISTENTE IA</h3>
+        <p id="ia-status" style="font-size:14px;">¿En qué puedo ayudarle hoy, Presidente?</p>
+        <input type="text" id="ia-input" placeholder="Zapatos, ropa, tecnología..." onchange="askValeria(this.value)">
+        <button class="btn-nav" style="width:100%; margin-top:10px;" onclick="closeModals()">Cerrar</button>
+    </div>
+</div>
+
+<footer>
+    DERECHOS RESERVADOS PRESIDENTE ELVIS R STONE <br> GLOBALINK CORPORATE GROUP © 2026
+</footer>
+
+<script>
+    const WHATSAPP = "50660989585";
+    const PIN_VIP = "108926";
+    const MI_PAYPAL = "elvisevans031089@gmail.com";
+    let cart = JSON.parse(localStorage.getItem('globalink_cart')) || [];
+
+    const productos = [
+        {id: 1, n: "Zapatos Élite", p: 65, img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff", v: ["Hombre", "Mujer", "Niño"]},
+        {id: 2, n: "Ropa & Moda", p: 45, img: "https://images.unsplash.com/photo-1483985988355-763728e1935b", v: ["S", "M", "L", "XL"]},
+        {id: 3, n: "Utensilios Cocina", p: 85, img: "https://images.unsplash.com/photo-1556910103-1c02745aae4d", v: ["Set Premium", "Set Básico"]},
+        {id: 4, n: "Artículos Hogar", p: 120, img: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a", v: ["Decoración", "Muebles"]},
+        {id: 5, n: "Tecnología", p: 450, img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30", v: ["G-Pro Phone", "Tablet X"]},
+        {id: 6, n: "Deportes Pro", p: 55, img: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438", v: ["Pesas", "Cardio"]},
+        {id: 7, n: "Accesorios Carros", p: 95, img: "https://images.unsplash.com/photo-1558981403-c5f91cbcf523", v: ["Tuning", "Seguridad"]},
+        {id: 8, n: "Motos Especial", p: 1500, img: "https://images.unsplash.com/photo-1558981403-c5f91cbcf523", v: ["250cc", "600cc"]},
+        {id: 9, n: "Paquete VIP $50", p: 50, img: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b", v: ["Edición Limitada"]},
+        {id: 10, n: "Paquete VIP $100", p: 100, img: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b", v: ["Edición Platinum"]}
+    ];
+
+    function initApp() {
+        renderCatalog();
+        updateCartUI();
+        valeriaSpeak("Sistema Globalink iniciado. Bienvenido Presidente Elvis Stone.");
+    }
+
+    function show(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        closeModals();
+        window.scrollTo(0,0);
+    }
+
+    function renderCatalog() {
+        const cat = document.getElementById('catalog');
+        productos.forEach(p => {
+            cat.innerHTML += `
+                <div class="card">
+                    <img src="${p.img}">
+                    <h4>${p.n.toUpperCase()}</h4>
+                    <p style="color:var(--neon); font-size:1.2rem;">$${p.p}</p>
+                    <button class="btn-nav" onclick="openDetails(${p.id})">VER VARIEDAD</button>
+                </div>`;
+        });
+    }
+
+    function openDetails(id) {
+        const p = productos.find(x => x.id === id);
+        const body = document.getElementById('modal-body');
+        body.innerHTML = `
+            <h3 style="color:var(--neon)">${p.n}</h3>
+            <img src="${p.img}" style="width:100px; border-radius:10px;">
+            <p>Seleccione Especificación:</p>
+            <select id="variant-select">
+                ${p.v.map(v => `<option value="${v}">${v}</option>`).join('')}
+            </select>
+            <button class="btn-nav" style="width:100%; margin-top:20px;" onclick="addConfirm(${p.id})">AÑADIR AL CARRITO</button>
+            <button class="btn-nav" style="width:100%; margin-top:10px; border-color:red; color:red;" onclick="closeModals()">CANCELAR</button>
+        `;
+        document.getElementById('product-modal').style.display = 'flex';
+    }
+
+    function addConfirm(id) {
+        const p = productos.find(x => x.id === id);
+        const v = document.getElementById('variant-select').value;
+        cart.push({name: p.n, variant: v, price: p.p});
+        saveCart();
+        updateCartUI();
+        closeModals();
+        valeriaSpeak("Artículo guardado en memoria. ¿Desea pagar ahora?");
+    }
+
+    function updateCartUI() {
+        document.getElementById('cart-count').innerText = cart.length;
+    }
+
+    function saveCart() {
+        localStorage.setItem('globalink_cart', JSON.stringify(cart));
+    }
+
+    function showCart() {
+        const list = document.getElementById('cart-items');
+        list.innerHTML = cart.map((i, index) => `
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px; border-bottom:1px solid #222;">
+                <span>${i.name} (${i.variant})</span>
+                <span>$${i.price} <button onclick="removeItem(${index})" style="color:red; background:none; border:none; cursor:pointer;">X</button></span>
+            </div>
+        `).join('');
+        
+        let sub = cart.reduce((s, i) => s + i.price, 0);
+        let desc = sub * 0.10;
+        let total = sub - desc;
+
+        document.getElementById('subtotal-val').innerText = "$" + sub.toFixed(2);
+        document.getElementById('desc-val').innerText = "-$" + desc.toFixed(2);
+        document.getElementById('cart-total').innerText = "$" + total.toFixed(2);
+        
+        document.getElementById('cart-modal').style.display = 'flex';
+        if(total > 0) renderPaypal(total);
+    }
+
+    function removeItem(idx) {
+        cart.splice(idx, 1);
+        saveCart();
+        updateCartUI();
+        showCart();
+    }
+
+    function renderPaypal(monto) {
+        document.getElementById('paypal-container').innerHTML = "";
+        paypal.Buttons({
+            createOrder: (d, a) => a.order.create({ purchase_units: [{ amount: { value: monto.toFixed(2) } }] }),
+            onApprove: (d, a) => a.order.capture().then(det => {
+                const msg = `NUEVA VENTA GLOBALINK: Total $${monto}. Comprador: ${det.payer.name.given_name}. Pago a: ${MI_PAYPAL}. Por favor procesar envío.`;
+                window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`);
+                cart = [];
+                saveCart();
+                updateCartUI();
+                show('home');
+                alert("PAGO EXITOSO. EL PRESIDENTE HA SIDO NOTIFICADO.");
+            })
+        }).render('#paypal-container');
+    }
+
+    function accessVIP() {
+        const p = prompt("INGRESE PIN DE SOCIO CORPORATIVO:");
+        if(p === PIN_VIP) {
+            show('vip');
+            initChart();
+        } else {
+            alert("PIN INCORRECTO");
+        }
+    }
+
+    function initChart() {
+        new Chart(document.getElementById('vipChart'), {
+            type: 'line',
+            data: {
+                labels: ['Inic', 'Socio A', 'Socio B', 'Hoy'],
+                datasets: [{
+                    label: 'Crecimiento Globalink Pro ($)',
+                    data: [1000, 2500, 2100, 4800],
+                    borderColor: '#39FF14',
+                    backgroundColor: 'rgba(57, 255, 20, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            }
+        });
+    }
+
+    function toggleValeria() {
+        document.getElementById('valeria-modal').style.display = 'flex';
+    }
+
+    function askValeria(q) {
+        const text = q.toLowerCase();
+        const output = document.getElementById('ia-status');
+        if(text.includes("zapatos")) {
+            show('shop');
+            output.innerText = "Abriendo catálogo de calzado...";
+        } else if(text.includes("tecnología")) {
+            show('shop');
+            output.innerText = "Mostrando lo último en tecnología corporativa...";
+        } else {
+            output.innerText = "He buscado " + q + " en el almacén de Globalink.";
+        }
+        valeriaSpeak(output.innerText);
+    }
+
+    function valeriaSpeak(t) {
+        const u = new SpeechSynthesisUtterance(t);
+        u.lang = 'es-ES';
+        u.rate = 0.95;
+        window.speechSynthesis.speak(u);
+    }
+
+    function closeModals() {
+        document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+    }
+</script>
+</body>
+</html>
